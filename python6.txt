@@ -1,0 +1,67 @@
+# # 1. Не используя библиотеки для парсинга,
+# # распарсить (получить определённые данные) файл логов web-сервера nginx_logs.txt
+#
+# # import requests
+# # from bs4 import BeautifulSoup
+# #
+# # path = '(https://github.com/elastic/examples/raw/master/Common%20Data%20Formats/nginx_logs/nginx_logs)'
+# # r = requests.get(path)
+# # print(r.text)
+# # soup = (BeautifulSoup(r.text,'lxml'))
+# # soup.find('<remote_addr>').find('<request_type>').find('<requested_resource>')
+# #
+# # data = []
+# # data.append([soup.find])
+
+
+
+
+
+# задание 3
+# Есть два файла: в одном хранятся ФИО пользователей сайта, а в другом — данные об их хобби.
+# Известно, что при хранении данных используется принцип: одна строка — один пользователь, разделитель между значениями — запятая.
+# Написать код, загружающий данные из обоих файлов и формирующий из них словарь: ключи — ФИО, значения — данные о хобби.
+# Сохранить словарь в файл. Проверить сохранённые данные. Если в файле, хранящем данные о хобби, меньше записей, чем в файле с ФИО, задаём в словаре значение None.
+# Если наоборот — выходим из скрипта с кодом «1». При решении задачи считать, что объём данных в файлах во много раз меньше объема ОЗУ.
+# Фрагмент файла с данными о пользователях (users.csv):
+# Иванов,Иван,Иванович
+# Петров,Петр,Петрович
+# Фрагмент файла с данными о хобби : (hobby.csv)
+# скалолазание,охота
+# горные лыжи
+
+# //создала 2 отдельных файла
+#
+# //users.csv
+# //names = [Иванов Иван Иванович','Петров Петр Петрович']
+#
+# //hobby.csv
+# //hobby = ['скалолазание,охота','горные лыжи']
+
+
+import json
+
+# file1 = open('users.csv', 'r', encoding='UTF-8')
+# data1 = file1.read()
+# a = print(data1)
+#
+# file1.close()
+#
+# file2 = open('hobby.csv', 'r', encoding='UTF-8')
+# data2 = file2.read()
+# b = print(data2)
+# file2.close()
+#
+# x = dict(list(a.items()) + list(b.items()))
+# print(x)
+
+
+###2й вариант
+# contents = []
+# json_dir_name1 = "users.csv"
+# json_dir_name2 = "hobby.csv"
+#
+# json_pattern = json.join(json_dir_name1,json_dir_name2)
+#
+# for file in json_pattern:
+#   contents.append(read(file))
