@@ -1,0 +1,197 @@
+drop database if exists vk;
+create database vk;
+use vk ;
+
+drop table if exists users;
+create table users (
+id serial primary key, -- bigint not null  auto_increment unique 
+firstname varchar (100),
+lastname varchar(100) comment 'Фамилия',
+email varchar (120) unique ,
+password_hash varchar (100),
+phone bigint unsigned, 
+index users_lastname_firstname_idx(lastname,firstname)
+);
+
+-- 1-1
+
+drop table if exists `profiles` ;
+create table `profiles` (
+user_id serial primary key ,
+    gender char(1),
+    birthday date,
+    photo_id bigint unsigned ,
+    created_at datetime default now()
+    
+);
+
+alter table `profiles` add constraint fk_user_id
+foreign key (user_id) references users(id) on update cascade on delete cascade ;
+
+
+-- 1-m
+
+drop table if exists messages;
+create table messages (
+   id serial primary key ,
+   from_user_id bigint unsigned not null,-- отправитель 
+   to_user_id bigint unsigned not null,-- получатель
+   bady text,
+   created_at datetime default now(),
+   foreign key (from_user_id) references users(id) on update cascade on delete cascade, 
+   foreign key (to_user_id) references users(id) on update cascade on delete cascade 
+ );
+
+
+drop table if exists friend_requests ;
+create table friend_requests (
+     -- id serial ,
+     initiator_user_id bigint unsigned not null ,
+     target_user_id bigint unsigned not null,
+     `statys` enum ('requested','aproved','declined','unfriended'),-- когда знаем точное число 
+  requested_at datetime default now(),
+  updated_at datetime on update now(),-- curent_timestamp
+  primary key (initiator_user_id , target_user_id),-- составной первичный ключ
+  foreign key (initiator_user_id) references users(id) ,
+  foreign key (target_user_id) references users (id)
+);
+
+
+drop table if exists communities;
+create table communities (
+id serial primary key,
+name varchar (150),
+index communities_name_idx(name) 
+);
+
+-- m-m
+
+drop table if exists users_communities ;
+create table users_communities(
+    user_id bigint unsigned not null,
+    community_id bigint unsigned not null,
+    primary key (user_id , community_id),
+    foreign key (user_id) references users(id),
+    foreign key (community_id) references communities(id)
+);
+
+
+DROP TABLE IF EXISTS media_types;
+CREATE TABLE media_types(
+	id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+ 
+   created_at DATETIME DEFAULT NOW(),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+);
+
+
+DROP TABLE IF EXISTS media;
+CREATE TABLE media(
+	id SERIAL PRIMARY KEY,
+    media_type_id BIGINT UNSIGNED,
+    user_id BIGINT UNSIGNED NOT NULL,
+  	body text,
+    filename VARCHAR(255),
+    `size` INT,
+	metadata JSON,
+    created_at DATETIME DEFAULT NOW(),
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (media_type_id) REFERENCES media_types(id) ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+
+
+DROP TABLE IF EXISTS likes;
+CREATE TABLE likes(
+	id SERIAL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    media_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME DEFAULT NOW(),
+
+ 
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (media_id) REFERENCES media(id) ON UPDATE CASCADE ON DELETE CASCADE
+
+);
+
+DROP TABLE IF EXISTS `photo_albums`;
+CREATE TABLE `photo_albums` (
+	`id` SERIAL,
+	`name` varchar(255) DEFAULT NULL,
+    `user_id` BIGINT UNSIGNED DEFAULT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE SET NULL,
+  	PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `photos`;
+CREATE TABLE `photos` (
+	id SERIAL PRIMARY KEY,
+	`album_id` BIGINT unsigned NOT NULL,
+	`media_id` BIGINT unsigned NOT NULL,
+
+	FOREIGN KEY (album_id) REFERENCES photo_albums(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (media_id) REFERENCES media(id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+ALTER TABLE `profiles` ADD CONSTRAINT fk_photo_id
+    FOREIGN KEY (photo_id) REFERENCES photos(id)
+    ON UPDATE CASCADE ON DELETE set NULL;
+
+
+
+
+--  ДЗ 
+   
+   
+
+--  1-1
+DROP TABLE IF EXISTS dislikes;
+CREATE TABLE dislikes(
+	id SERIAL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    media_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME DEFAULT NOW(),
+
+ 
+    FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (media_id) REFERENCES media(id) ON UPDATE CASCADE ON DELETE CASCADE
+
+);
+
+drop table if exists live;
+create table live(
+   created_at DATETIME default NOW(),
+   initiator_user_id bigint unsigned not null,
+   target_user_id bigint unsigned not null,
+
+  primary key (initiator_user_id , target_user_id)
+  foreign key (initiator_user_id) references users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  foreign key (target_user_id) references users (id) ON UPDATE CASCADE ON DELETE CASCADE
+
+);
+
+-- 1-m
+DROP TABLE IF EXISTS `post`;
+CREATE TABLE `post` (
+  id SERIAL PRIMARY KEY ,
+  community_id int unsigned DEFAULT NULL,
+  user_id int unsigned NOT NULL,
+  text varchar(145) DEFAULT NULL,
+  media_id int DEFAULT NULL,
+  post_id int unsigned DEFAULT NULL,
+  created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  deleted_at datetime DEFAULT NULL,
+
+ 
+   FOREIGN KEY (community_id) REFERENCES communities  (id),
+   FOREIGN KEY (media_id) REFERENCES media (id),
+   FOREIGN KEY (post_id) REFERENCES post (id),
+   FOREIGN KEY (user_id) REFERENCES users (id)
+ );
+ 
